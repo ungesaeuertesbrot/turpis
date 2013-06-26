@@ -31,7 +31,7 @@ if (!match)
 	throw new Error('Could not find current file');
 
 const scriptFile = Gio.File.new_for_path(match[1]);
-const turpisDir = scriptFile.get_parent();
+const turpisDir = scriptFile.get_parent().get_parent();
 
 imports.searchPath.push(turpisDir.get_path());
 
