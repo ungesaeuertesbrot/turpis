@@ -24,6 +24,19 @@ TestAssemblyLine.prototype = {
 		return this._def;
 	},
 	
+	set turpisDir(dir) {
+		if (typeof dir === "string")
+			dir = Gio.File.new_for_path(dir);
+		if (!dir.query_exists(null))
+			throw new Error("No such directory");
+		
+		this._turpisDir = dir.get_path();
+	},
+	
+	get turpisDir() {
+		return this._turpisDir;
+	},
+	
 	set rootDir(dir) {
 		if (typeof dir === "string")
 			dir = Gio.File.new_for_path(dir);
@@ -47,7 +60,7 @@ TestAssemblyLine.prototype = {
 		let testFileBaseName = "test" + this._def.tests[this._index++] + ".js";
 		let testFile = this._rootDir.get_child(testFileBaseName);
 		
-		let test = new Test.Test(testFile, this._def.searchPath);
+		let test = new Test.Test(testFile, this);
 		test.rootDir = this._rootDir;
 		
 		return test;

@@ -1,19 +1,22 @@
 const Gio = imports.gi.Gio;
+const GLib = imports.gi.GLib;
 const System = imports.system;
 
 String.prototype.format = imports.format.format;
 
+var testDir;
 // TODO: more sophisticated command line parsing
-if (ARGV.length !== 1) {
-	printerr("You must provide the test directory as an argument to turpis");
-	System.exit(-1);
+if (ARGV.length > 0) {
+	testDir = Gio.File.new_for_path(ARGV[0]);
+	if (testDir.query_file_type(Gio.FileQueryInfoFlags.NONE, null) !== Gio.FileType.DIRECTORY)
+		testDir = undefined;
 }
-
-let testDir = ARGV[0];
+if (testDir === undefined)
+	testDir = GLib.get_current_dir();
 
 // extract default from current script's path. Logic stolen from
 // gnome shell (misc/extensionUtils.js).
-let stackLine = (new Error()).stack.split('\n')[0];
+var stackLine = (new Error()).stack.split('\n')[0];
 if (!stackLine)
 	throw new Error('Could not find current file');
 
@@ -23,18 +26,18 @@ if (!stackLine)
 // In the case that we're importing from
 // module scope, the first field is blank:
 //   @/home/user/data/gnome-shell/extensions/u@u.id/prefs.js:8
-let match = /@(.+):\d+/.exec(stackLine);
+var match = /@(.+):\d+/.exec(stackLine);
 if (!match)
 	throw new Error('Could not find current file');
 
-let scriptFile = Gio.File.new_for_path(match[1]);
-let turpisDir = scriptFile.get_parent();
+const scriptFile = Gio.File.new_for_path(match[1]);
+const turpisDir = scriptFile.get_parent();
 
 imports.searchPath.push(turpisDir.get_path());
 
-const Conductor = imports.turpis.testconductor;
+const TestConductor = imports.turpis.testconductor;
 	
-let conductor = new Conductor.TestConductor(testDir);
+const conductor = new TestConductor.TestConductor(turpisDir, testDir);
 conductor.runDBus();
 conductor.run();
 

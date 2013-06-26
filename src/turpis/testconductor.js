@@ -8,17 +8,18 @@ const Util = imports.turpis.util;
 
 const MAINLOOP_ID = "turpisMain";
 
-function TestConductor(dir) {
-	this._init(dir);
+function TestConductor(turpis, dir) {
+	this._init(turpis, dir);
 }
 
 TestConductor.prototype = {
-	_init: function(dir) {
+	_init: function(turpis, dir) {
 		this._children = [];
 		this._success = true;
 		// Must exist before setting the root directory
 		this._assemblyLine = new AssemblyLine.TestAssemblyLine();
-
+		this._assemblyLine.turpisDir = turpis;
+		
 		if (typeof dir === "string")
 			this.TestRootDir = dir;
 		else

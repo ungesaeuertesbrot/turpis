@@ -1,18 +1,27 @@
 const GLib = imports.gi.GLib;
 
-function Test(file, searchPath) {
-	this._init(file, searchPath);
+const Def = imports.turpis.definitions;
+
+function Test(file, assemblyLine) {
+	this._init(file, assemblyLine);
 }
 
 Test.prototype = {
-	_init: function(file, searchPath) {
+	_init: function(file, assemblyLine) {
 		this._callback = function() {};
 		this._rootDir = null;
 		this._fn = typeof file === "string" ? file : file.get_path();
 		
 		this._argv = ["gjs-console"];
-		for each (let p in searchPath)
+		for each (let p in assemblyLine.testDefinition.searchPath)
 			this._argv.push("-I", p);
+		
+		let flags = assemblyLine.testDefinition.flags;
+		if (typeof assemblyLine.turpisDir === "string"
+			&& (!Array.isArray(flags)
+				|| flags.indexOf(Def.FLAG_NO_TURPIS_IMPORTS) < 0))
+			this._argv.push("-I", assemblyLine.turpisDir);
+		
 		this._argv.push(this._fn);
 	},
 	
